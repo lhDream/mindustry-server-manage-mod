@@ -9,6 +9,7 @@ buildscript{
         //the build number that this mod is made for
         mindustryVersion = 'v130'
         kotlinVersion = "1.5.21"
+        ktorVersion = "2.3.3"
         sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
     }
     
@@ -29,6 +30,11 @@ repositories{
 dependencies{
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    implementation "io.ktor:ktor-server-core:$ktorVersion"
+    implementation "io.ktor:ktor-server-netty:$ktorVersion"
+    implementation "io.ktor:ktor-server-status-pages:$ktorVersion"
+    implementation "io.ktor:ktor-server-default-headers:$ktorVersion"
+
 }
 
 compileKotlin{
