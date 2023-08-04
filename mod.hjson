@@ -8,7 +8,7 @@ name: "mindustry-server-manager-mod"
 author: "lhDream"
 
 #the fully qualified main class of the mod
-main: "io.github.lhdream"
+main: "io.github.lhdream.ManagePlugin"
 
 #the mod description as seen in the mod dialog
 description: "mindustry server manager"
