@@ -30,10 +30,6 @@ repositories{
 dependencies{
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-    implementation "io.ktor:ktor-server-core:$ktorVersion"
-    implementation "io.ktor:ktor-server-netty:$ktorVersion"
-    implementation "io.ktor:ktor-server-status-pages:$ktorVersion"
-    implementation "io.ktor:ktor-server-default-headers:$ktorVersion"
 
 }
 
