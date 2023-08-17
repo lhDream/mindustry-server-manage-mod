@@ -1,7 +1,10 @@
 package io.github.lhdream
 
 import arc.Events
+import arc.struct.Seq
 import arc.util.CommandHandler
+import arc.util.Log.format
+import arc.util.Log.info
 import mindustry.Vars.maps
 import mindustry.content.Blocks
 import mindustry.game.EventType.BuildSelectEvent
@@ -10,6 +13,8 @@ import mindustry.game.Gamemode
 import mindustry.gen.Call
 import mindustry.gen.Player
 import mindustry.mod.Plugin
+import mindustry.maps.Map
+import java.lang.StringBuilder
 
 
 class ManagePlugin: Plugin() {
@@ -37,6 +42,38 @@ class ManagePlugin: Plugin() {
      * 客户端命令
      */
     override fun registerClientCommands(handler: CommandHandler) {
+
+        handler.register<Player>("maps","[all/custom/default]","显示可用的地图。 默认情况下仅显示自定义地图。"){args,player ->
+            val custom = args.isEmpty() || args[0].equals("custom") || args[0].equals("all")
+            val def = args.isNotEmpty() && (args[0].equals("default") || args[0].equals("all"))
+
+            if (!maps.all().isEmpty) {
+                val all = Seq<Map>()
+                if (custom) all.addAll(maps.customMaps())
+                if (def) all.addAll(maps.defaultMaps())
+                if (all.isEmpty) {
+                    val msg = format("未加载自定义地图. 显示默认地图, 请使用 \"@\" 参数.","all")
+                    Call.sendMessage(msg,"系统消息",player)
+                } else {
+                    info("Maps:")
+                    val msg = StringBuilder("Maps\n")
+                    for (map in all) {
+                        val mapName: String = map.name().replace(' ', '_')
+                        if (map.custom) {
+                            val str = format("  @ (@): &fiCustom / @x@\n", mapName, map.file.name(), map.width, map.height)
+                            msg.append(str)
+                        } else {
+                            val str = format("  @: &fiDefault / @x@\n", mapName, map.width, map.height)
+                            msg.append(str)
+                        }
+                    }
+                    Call.sendMessage(msg.toString(),"系统消息",player)
+                }
+            } else {
+                Call.sendMessage("没有发现任何地图","系统消息",player)
+            }
+        }
+
         handler.register<Player>("nextMap","<mapName>","设置下一张地图"){ args,player ->
             if(!player.admin){
                 Call.sendMessage("非管理员用户，不可切换地图","系统消息",player)
@@ -49,7 +86,6 @@ class ManagePlugin: Plugin() {
             }else{
                 Call.sendMessage("地图${args[0]}无法找到","系统消息",player)
             }
-
         }
 
     }
