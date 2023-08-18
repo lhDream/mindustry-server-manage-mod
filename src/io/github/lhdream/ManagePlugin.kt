@@ -3,8 +3,7 @@ package io.github.lhdream
 import arc.Events
 import arc.struct.Seq
 import arc.util.CommandHandler
-import arc.util.Log.format
-import arc.util.Log.info
+import arc.util.Log.*
 import mindustry.Vars.maps
 import mindustry.content.Blocks
 import mindustry.game.EventType.BuildSelectEvent
@@ -52,7 +51,7 @@ class ManagePlugin: Plugin() {
                 if (custom) all.addAll(maps.customMaps())
                 if (def) all.addAll(maps.defaultMaps())
                 if (all.isEmpty) {
-                    val msg = format("未加载自定义地图. 显示默认地图, 请使用 \"@\" 参数.","all")
+                    val msg = formatColors("未加载自定义地图. 显示默认地图, 请使用 \"@\" 参数.",false,"all")
                     Call.sendMessage(msg,"系统消息",player)
                 } else {
                     info("Maps:")
@@ -60,10 +59,10 @@ class ManagePlugin: Plugin() {
                     for (map in all) {
                         val mapName: String = map.name().replace(' ', '_')
                         if (map.custom) {
-                            val str = format("  @ (@): &fiCustom / @x@\n", mapName, map.file.name(), map.width, map.height)
+                            val str = formatColors("  @ (@): &fiCustom / @x@\n",false, mapName, map.file.name(), map.width, map.height)
                             msg.append(str)
                         } else {
-                            val str = format("  @: &fiDefault / @x@\n", mapName, map.width, map.height)
+                            val str = formatColors("  @: &fiDefault / @x@\n",false, mapName, map.width, map.height)
                             msg.append(str)
                         }
                     }
