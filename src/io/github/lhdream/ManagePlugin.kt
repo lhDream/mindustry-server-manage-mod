@@ -2,40 +2,28 @@ package io.github.lhdream
 
 import arc.Core
 import arc.Events
-import arc.func.Cons
 import arc.struct.ArrayMap
 import arc.struct.Seq
 import arc.util.Align
 import arc.util.CommandHandler
 import arc.util.Log.*
-import arc.util.Strings
 import io.github.lhdream.config.UserConfig
 import mindustry.Vars.*
-import mindustry.ai.BlockIndexer
-import mindustry.ai.Pathfinder.EnemyCoreField
 import mindustry.content.Blocks
 import mindustry.game.EventType.*
-import mindustry.game.GameStats
 import mindustry.game.Gamemode
 import mindustry.gen.Call
 import mindustry.gen.Groups
-import mindustry.gen.Icon.map
 import mindustry.gen.Player
 import mindustry.maps.Map
 import mindustry.mod.Plugin
-import mindustry.net.Administration
-import mindustry.net.Packets.KickReason
 import java.lang.Thread.sleep
 import kotlin.concurrent.thread
 
 
 class ManagePlugin: Plugin() {
 
-    val userConfigs: ArrayMap<String, UserConfig> = ArrayMap()
-
-    val gameOverEvent: Cons<GameOverEvent> = Cons<GameOverEvent>{
-
-    }
+    private val userConfigs: HashMap<String, UserConfig> = HashMap()
 
     override fun init() {
         Events.on(BuildSelectEvent::class.java){
@@ -53,8 +41,8 @@ class ManagePlugin: Plugin() {
                         if(userConfig == null || userConfig.broad){
                             val msg = """
                             [magenta]欢迎[goldenrod]${it.name}[magenta]来到服务器[red]
-                            [violet]当前地图为: [yellow][${state.map.name()}][orange]width:${state.map.width},height: ${state.map.height}
-                            [royal]输入/broad可以开关该显示
+                            [violet]当前地图为: [yellow][${state.map.name()}][orange]  宽 : ${state.map.width},高 : ${state.map.height}
+                            [royal]输入 /broad 可以开关该显示
                         """.trimIndent()
                             Call.infoPopup(it.con,msg,2.013f,Align.topLeft,200,0,0,0)
                         }
@@ -76,7 +64,12 @@ class ManagePlugin: Plugin() {
      */
     override fun registerClientCommands(handler: CommandHandler) {
         handler.register<Player>("broad","开关消息面板"){ args, player ->
-
+            var userConfig = userConfigs[player.uuid()]
+            if(userConfig == null){
+                userConfig = UserConfig()
+                userConfigs[player.uuid()] = userConfig
+            }
+            userConfig.broad = !userConfig.broad
         }
 
         // 查看地图列表
