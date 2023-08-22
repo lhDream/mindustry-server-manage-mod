@@ -1,22 +1,35 @@
 package io.github.lhdream
 
+import arc.Core
 import arc.Events
+import arc.func.Cons
 import arc.struct.Seq
+import arc.util.Align
 import arc.util.CommandHandler
 import arc.util.Log.*
-import mindustry.Vars.maps
+import arc.util.Strings
+import mindustry.Vars.*
+import mindustry.ai.BlockIndexer
+import mindustry.ai.Pathfinder.EnemyCoreField
 import mindustry.content.Blocks
-import mindustry.game.EventType.BuildSelectEvent
-import mindustry.game.EventType.CoreChangeEvent
+import mindustry.game.EventType.*
+import mindustry.game.GameStats
 import mindustry.game.Gamemode
 import mindustry.gen.Call
+import mindustry.gen.Groups
 import mindustry.gen.Player
-import mindustry.mod.Plugin
 import mindustry.maps.Map
-import java.lang.StringBuilder
+import mindustry.mod.Plugin
+import mindustry.net.Administration
+import mindustry.net.Packets.KickReason
+import java.lang.Thread.sleep
 
 
 class ManagePlugin: Plugin() {
+
+    val gameOverEvent: Cons<GameOverEvent> = Cons<GameOverEvent>{
+
+    }
 
     override fun init() {
         Events.on(BuildSelectEvent::class.java){
@@ -24,10 +37,15 @@ class ManagePlugin: Plugin() {
                 Call.sendMessage("${it.builder.player.name} 在[${it.tile.x},${it.tile.y}]位置建造了反应堆")
             }
         }
-
-        Events.on(CoreChangeEvent::class.java){
+        Events.on(UnitChangeEvent::class.java){
 
         }
+
+        val msg = "测试消息"
+        Groups.player.forEach {
+            Call.infoPopup(it.con,msg,2.013f,Align.topLeft,210,0,0,0)
+        }
+
     }
 
     /**
@@ -41,7 +59,7 @@ class ManagePlugin: Plugin() {
      * 客户端命令
      */
     override fun registerClientCommands(handler: CommandHandler) {
-
+        // 查看地图列表
         handler.register<Player>("maps","[all/custom/default]","显示可用的地图。 默认情况下仅显示自定义地图。"){args,player ->
             val custom = args.isEmpty() || args[0].equals("custom") || args[0].equals("all")
             val def = args.isNotEmpty() && (args[0].equals("default") || args[0].equals("all"))
@@ -72,7 +90,7 @@ class ManagePlugin: Plugin() {
                 Call.sendMessage("没有发现任何地图","系统消息",player)
             }
         }
-
+        // 设置下一张地图
         handler.register<Player>("nextMap","<mapName>","设置下一张地图"){ args,player ->
             if(!player.admin){
                 Call.sendMessage("非管理员用户，不可切换地图","系统消息",player)
@@ -85,6 +103,16 @@ class ManagePlugin: Plugin() {
             }else{
                 Call.sendMessage("地图${args[0]}无法找到","系统消息",player)
             }
+        }
+        // 本局游戏结束
+        handler.register<Player>("gameover","结束当前游戏"){ args,player->
+            if(state.isMenu){
+                err("Not playing a map.");
+                return@register
+            }
+            Call.updateGameOver(state.rules.waveTeam)
+            Events.fire(GameOverEvent(state.rules.waveTeam))
+
         }
 
     }
