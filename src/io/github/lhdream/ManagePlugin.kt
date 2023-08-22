@@ -17,6 +17,7 @@ import mindustry.game.GameStats
 import mindustry.game.Gamemode
 import mindustry.gen.Call
 import mindustry.gen.Groups
+import mindustry.gen.Icon.map
 import mindustry.gen.Player
 import mindustry.maps.Map
 import mindustry.mod.Plugin
@@ -42,7 +43,6 @@ class ManagePlugin: Plugin() {
 
         }
 
-        val msg = "测试消息"
 //        Event.on(PlayerJoin){
 //
 //        }
@@ -51,6 +51,13 @@ class ManagePlugin: Plugin() {
                 sleep(1000)
                 Core.app.post {
                     Groups.player.forEach {
+                        val msg = """
+                                    [magenta]欢迎[goldenrod]${it.name}[magenta]来到服务器[red]
+                                    [violet]当前地图为: [yellow][${state.map.name()}][orange]{map.name}
+                                    {scoreBroad.ext.*:${"\n"}}
+                                    [royal]输入/broad可以开关该显示
+                                    """.trimIndent()
+
                         Call.infoPopup(it.con,msg,2.013f,Align.topLeft,210,0,0,0)
                     }
                 }
