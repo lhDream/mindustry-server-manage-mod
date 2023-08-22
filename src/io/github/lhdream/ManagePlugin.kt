@@ -23,6 +23,7 @@ import mindustry.mod.Plugin
 import mindustry.net.Administration
 import mindustry.net.Packets.KickReason
 import java.lang.Thread.sleep
+import kotlin.concurrent.thread
 
 
 class ManagePlugin: Plugin() {
@@ -42,10 +43,19 @@ class ManagePlugin: Plugin() {
         }
 
         val msg = "测试消息"
-        Groups.player.forEach {
-            Call.infoPopup(it.con,msg,2.013f,Align.topLeft,210,0,0,0)
+//        Event.on(PlayerJoin){
+//
+//        }
+        thread{
+            while(true){
+                sleep(1000)
+                Core.app.post {
+                    Groups.player.forEach {
+                        Call.infoPopup(it.con,msg,2.013f,Align.topLeft,210,0,0,0)
+                    }
+                }
+            }
         }
-
     }
 
     /**
