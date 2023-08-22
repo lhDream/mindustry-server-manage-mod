@@ -3,11 +3,13 @@ package io.github.lhdream
 import arc.Core
 import arc.Events
 import arc.func.Cons
+import arc.struct.ArrayMap
 import arc.struct.Seq
 import arc.util.Align
 import arc.util.CommandHandler
 import arc.util.Log.*
 import arc.util.Strings
+import io.github.lhdream.config.UserConfig
 import mindustry.Vars.*
 import mindustry.ai.BlockIndexer
 import mindustry.ai.Pathfinder.EnemyCoreField
@@ -29,6 +31,8 @@ import kotlin.concurrent.thread
 
 class ManagePlugin: Plugin() {
 
+    val userConfigs: ArrayMap<String, UserConfig> = ArrayMap()
+
     val gameOverEvent: Cons<GameOverEvent> = Cons<GameOverEvent>{
 
     }
@@ -39,26 +43,21 @@ class ManagePlugin: Plugin() {
                 Call.sendMessage("${it.builder.player.name} 在[${it.tile.x},${it.tile.y}]位置建造了反应堆")
             }
         }
-        Events.on(UnitChangeEvent::class.java){
 
-        }
-
-//        Event.on(PlayerJoin){
-//
-//        }
         thread{
             while(true){
                 sleep(1000)
                 Core.app.post {
                     Groups.player.forEach {
-                        val msg = """
-                                    [magenta]欢迎[goldenrod]${it.name}[magenta]来到服务器[red]
-                                    [violet]当前地图为: [yellow][${state.map.name()}][orange]{map.name}
-                                    {scoreBroad.ext.*:${"\n"}}
-                                    [royal]输入/broad可以开关该显示
-                                    """.trimIndent()
-
-                        Call.infoPopup(it.con,msg,2.013f,Align.topLeft,210,0,0,0)
+                        val userConfig = userConfigs[it.uuid()]
+                        if(userConfig == null || userConfig.broad){
+                            val msg = """
+                            [magenta]欢迎[goldenrod]${it.name}[magenta]来到服务器[red]
+                            [violet]当前地图为: [yellow][${state.map.name()}][orange]width:${state.map.width},height: ${state.map.height}
+                            [royal]输入/broad可以开关该显示
+                        """.trimIndent()
+                            Call.infoPopup(it.con,msg,2.013f,Align.topLeft,200,0,0,0)
+                        }
                     }
                 }
             }
@@ -76,6 +75,10 @@ class ManagePlugin: Plugin() {
      * 客户端命令
      */
     override fun registerClientCommands(handler: CommandHandler) {
+        handler.register<Player>("broad","开关消息面板"){ args, player ->
+
+        }
+
         // 查看地图列表
         handler.register<Player>("maps","[all/custom/default]","显示可用的地图。 默认情况下仅显示自定义地图。"){args,player ->
             val custom = args.isEmpty() || args[0].equals("custom") || args[0].equals("all")
