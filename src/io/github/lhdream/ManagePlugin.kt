@@ -37,9 +37,7 @@ class ManagePlugin: Plugin() {
 //            }
 //        }
         Events.on(PlayerJoin::class.java){
-            it.player
-            Call.infoPopup(it.player.con,"",2.0f,Align.center,0,0,0,0)
-            Call.menu(it.player.con,0,"","", arrayOf(arrayOf()))
+            Call.infoPopup(it.player.con,"[magenta]欢迎加入[red]${it.player.name}[magenta]加入游戏",2.0f,Align.center,0,0,0,0)
         }
 
 
