@@ -1,6 +1,7 @@
 package io.github.lhdream
 
 import arc.Core
+import arc.Core.bundle
 import arc.Events
 import arc.struct.ArrayMap
 import arc.struct.Seq
@@ -17,6 +18,7 @@ import mindustry.gen.Groups
 import mindustry.gen.Player
 import mindustry.maps.Map
 import mindustry.mod.Plugin
+import mindustry.net.Net
 import java.lang.Thread.sleep
 import kotlin.concurrent.thread
 
@@ -26,11 +28,20 @@ class ManagePlugin: Plugin() {
     private val userConfigs: HashMap<String, UserConfig> = HashMap()
 
     override fun init() {
-        Events.on(BuildSelectEvent::class.java){
-            if(!it.breaking && it.builder?.buildPlan()?.block == Blocks.thoriumReactor && it.builder.isPlayer){
-                Call.sendMessage("${it.builder.player.name} 在[${it.tile.x},${it.tile.y}]位置建造了反应堆")
-            }
+        Events.on(BlockBuildEndEvent::class.java){
+            Call.sendMessage("${it.unit.player} 在[${it.tile.x},${it.tile.y}]位置建造了杜反应堆")
         }
+//        Events.on(BuildSelectEvent::class.java){
+//            if(!it.breaking && it.builder?.buildPlan()?.block == Blocks.thoriumReactor && it.builder.isPlayer){
+//                Call.sendMessage("${it.builder.player.name} 在[${it.tile.x},${it.tile.y}]位置建造了反应堆")
+//            }
+//        }
+        Events.on(PlayerJoin::class.java){
+            it.player
+            Call.infoPopup(it.player.con,"",2.0f,Align.center,0,0,0,0)
+            Call.menu(it.player.con,0,"","", arrayOf(arrayOf()))
+        }
+
 
         thread{
             while(true){
@@ -86,50 +97,48 @@ class ManagePlugin: Plugin() {
                     Call.sendMessage(msg,"系统消息",player)
                 } else {
                     info("Maps:")
-                    val msg = StringBuilder("Maps\n")
+                    val msg = StringBuilder("[magenta]Maps\n")
                     for (map in all) {
                         val mapName: String = map.name().replace(' ', '_')
                         if (map.custom) {
-                            val str = formatColors("  @ (@): &fiCustom / @x@\n",false, mapName, map.file.name(), map.width, map.height)
+                            val str = formatColors("[violet] @ (@): &fiCustom / @x@\n",false, mapName, map.file.name(), map.width, map.height)
                             msg.append(str)
                         } else {
-                            val str = formatColors("  @: &fiDefault / @x@\n",false, mapName, map.width, map.height)
+                            val str = formatColors("[violet] @: &fiDefault / @x@\n",false, mapName, map.width, map.height)
                             msg.append(str)
                         }
                     }
-                    Call.sendMessage(msg.toString(),"系统消息",player)
+                    Call.sendMessage(msg.toString(),"",player)
                 }
             } else {
-                Call.sendMessage("没有发现任何地图","系统消息",player)
+                Call.sendMessage("[yellow]没有发现任何地图","",player)
             }
         }
         // 设置下一张地图
         handler.register<Player>("nextMap","<mapName>","设置下一张地图"){ args,player ->
             if(!player.admin){
-                Call.sendMessage("非管理员用户，不可切换地图","系统消息",player)
+                Call.sendMessage("非管理员用户，不可切换地图","",player)
                 return@register
             }
             val res = maps.byName(args[0])
             if(res != null){
                 maps.shuffleMode.next(Gamemode.survival,res)
-                Call.sendMessage("设置完成","系统消息",player)
+                Call.sendMessage("设置完成","",player)
             }else{
-                Call.sendMessage("地图${args[0]}无法找到","系统消息",player)
+                Call.sendMessage("[yellow]地图[magenta]${args[0]}[yellow]无法找到","",player)
             }
         }
         // 本局游戏结束
-        handler.register<Player>("gameover","结束当前游戏"){ args,player->
+        handler.register<Player>("gg","结束当前游戏"){ args,player->
             if(state.isMenu){
                 err("Not playing a map.");
                 return@register
             }
             Call.updateGameOver(state.rules.waveTeam)
             Events.fire(GameOverEvent(state.rules.waveTeam))
-
+            Core.app
         }
 
     }
-
-
 
 }
